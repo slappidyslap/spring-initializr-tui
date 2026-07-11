@@ -81,3 +81,23 @@ tasks.named<Copy>("processResources") {
         ))
     }
 }
+
+val osName: String = System.getProperty("os.name").lowercase()
+val homeDir: File = file(System.getProperty("user.home"))
+val installBinDir: File = file("$homeDir/.local/bin")
+
+tasks.register("installLocalNative") {
+    dependsOn("nativeCompile")
+    description = "Install native binary to $installBinDir"
+    group = "distribution"
+    doLast {
+        installBinDir.mkdirs()
+        val exeSourceName = if (osName.contains("win")) "spring-initializr-tui.exe" else "spring-initializr-tui"
+        val exeSource = layout.buildDirectory.file("native/nativeCompile/$exeSourceName").get().asFile
+        val exeTargetName = if (osName.contains("win")) "spring.exe" else "spring"
+        val exeTarget = file("$installBinDir/$exeTargetName")
+        exeSource.copyTo(exeTarget, overwrite = true)
+        exeTarget.setExecutable(/*executable = */true, /*ownerOnly = */false)
+        logger.lifecycle("Native binary installed: {}", exeTarget.absolutePath)
+    }
+}
