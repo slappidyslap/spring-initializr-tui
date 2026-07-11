@@ -81,27 +81,54 @@ mvn compile exec:java
 
 ### JAR
 
+#### Maven
+
 ```bash
 mvn package -DskipTests
 java --enable-preview -jar target/spring-initializr-tui-0.1.1.jar
+```
+
+#### Gradle
+
+```bash
+gradle jar -x test
+java --enable-preview -jar build/libs/spring-initializr-tui-<version>.jar
 ```
 
 ### Fat JAR (Shade)
 
 Build a self-contained JAR with all dependencies bundled:
 
+#### Maven
+
 ```bash
 mvn package -Pshade -DskipTests
-java --enable-preview -jar target/spring-initializr-tui-0.1.1.jar
+java --enable-preview -jar target/spring-initializr-tui-*.jar
+```
+
+#### Gradle
+
+```bash
+gradle shadowJar -x test
+java --enable-preview -jar build/libs/spring-initializr-tui-<version>-all.jar
 ```
 
 ### Native Image (GraalVM)
 
 Compile to a standalone native binary for instant startup:
 
+#### Maven
+
 ```bash
 mvn clean -Pnative package -DskipTests
 ./target/spring-initializr-tui
+```
+
+#### Gradle
+
+```bash
+gradle compileNative
+./build/native/nativeCompile/spring-initializr-tui
 ```
 
 > Requires GraalVM 25 as your `JAVA_HOME`. If using SDKMAN: `sdk use java 25.0.2-graalce`
