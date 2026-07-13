@@ -1,6 +1,8 @@
 package dev.danvega.initializr.ui;
 
 import dev.danvega.initializr.api.InitializrMetadata;
+import dev.danvega.initializr.model.BootVersion;
+import dev.danvega.initializr.model.BootVersionRange;
 import dev.danvega.initializr.model.ProjectConfig;
 import dev.tamboui.style.Color;
 import dev.tamboui.toolkit.element.Element;
@@ -166,6 +168,16 @@ public class DependencyPicker {
         return result;
     }
 
+    private String resolveVersionRange(String versionRange) {
+        if (versionRange == null || versionRange.isBlank()) return "";
+
+        BootVersionRange range = BootVersionRange.parse(versionRange);
+
+        if (range == null) return "";
+
+        return range.supports(BootVersion.parse(config.getBootVersion())) ? range.toString() : "";
+    }
+
     private void rebuildWithFuzzySearch() {
         record ScoredDep(InitializrMetadata.Dependency dep, String categoryName, int score, int[] matchPositions) {}
 
@@ -305,13 +317,14 @@ public class DependencyPicker {
                 boolean isCursor = i == cursorIndex;
                 String checkmark = isSelected ? " \u2713 " : "   ";
                 String prefix = isCursor ? " \u25b8" : "  ";
-                String depName = dep.name();
+                String depName = dep.name() + " ";
+                String versionRange = resolveVersionRange(dep.versionRange());
 
                 if (inSearchMode && item.matchPositions() != null && item.matchPositions().length > 0) {
                     // Render with highlighted match positions
                     elements.add(renderHighlightedDep(prefix, checkmark, depName, item.matchPositions(), isCursor, isSelected));
                 } else {
-                    String label = prefix + checkmark + depName;
+                    String label = prefix + checkmark + depName + versionRange;
                     var line = text(label);
                     if (isCursor) {
                         line = line.fg(t.text()).bold();
